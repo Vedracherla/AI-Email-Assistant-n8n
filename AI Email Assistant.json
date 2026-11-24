@@ -1,0 +1,282 @@
+{
+  "name": "AI Email Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "00b6db84-df69-45c5-ab55-29a0be88036d",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "RtySv5OfyTpsGv9W",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "Gemini 2.5 Flash",
+          "cachedResultUrl": ""
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an email assistant. Read the email below.\n\nFrom: {{ $json.From }}\nSubject: {{ $json.Subject }}\nBody: {{ snippet/text }}\n\nReturn ONLY JSON with these keys:\n- category: one of Inquiry, Complaint, Spam, Other\n- summary: 2 short sentences\n- reply: a polite, short draft reply (empty if Spam)"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "612c76eb-6678-49fe-8e51-d090fb06d8e4",
+      "name": "Message a model",
+      "retryOnFail": true,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ro3mmxxBKyTftZjy",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ecac7c5a-14c0-4501-a2cc-598fe4048255",
+              "name": "Category",
+              "value": "={{ JSON.parse($json.content.parts[0].text).category }}",
+              "type": "string"
+            },
+            {
+              "id": "2a97b4ea-18e7-46d7-86d0-08a6d2ca3a39",
+              "name": "Summary",
+              "value": "={{ JSON.parse($json.content.parts[0].text).summary }}",
+              "type": "string"
+            },
+            {
+              "id": "ae5de34d-5486-463c-a1b6-0e79e82a9b9a",
+              "name": "Reply",
+              "value": "={{ JSON.parse($json.content.parts[0].text).reply }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        592,
+        0
+      ],
+      "id": "a277db29-22f5-4c89-bd67-b41d4eb52d3a",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "=Re:  {{ $('Gmail Trigger').item.json.Subject }}",
+        "message": "={{ $json.Reply }}",
+        "options": {
+          "sendTo": "={{ $('Gmail Trigger').item.json.To }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        816,
+        0
+      ],
+      "id": "7485f980-c1e3-457b-8d4d-1d5b03a3b513",
+      "name": "Create a draft",
+      "webhookId": "c0414316-18cd-4f80-86e0-b649543d4573",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "RtySv5OfyTpsGv9W",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1m0lr-Hpij0K3M_bId_pxrsR9_X4ZnVBpXWeGEbIss9k",
+          "mode": "list",
+          "cachedResultName": "Email Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1m0lr-Hpij0K3M_bId_pxrsR9_X4ZnVBpXWeGEbIss9k/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1m0lr-Hpij0K3M_bId_pxrsR9_X4ZnVBpXWeGEbIss9k/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "From": "={{ $('Gmail Trigger').item.json.From }}",
+            "Subject": "={{ $('Gmail Trigger').item.json.Subject }}",
+            "Category": "={{ $('Edit Fields').item.json.Category }}",
+            "Summary": "={{ $('Edit Fields').item.json.Summary }}",
+            "Date": "={{ $now.format('yyyy-MM-dd HH:mm') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "From",
+              "displayName": "From",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Subject",
+              "displayName": "Subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Summary",
+              "displayName": "Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "6ed07c21-338b-4df7-ae37-3e6273663a42",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wqjIIMUUyWERligZ",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a draft": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "37ca7400-e99c-436e-a833-4faa73974723",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "64719ad6d5a57cd835beaf6a934a69caf7346bcf7bf9b4a040ae0b5108cd7b0a"
+  },
+  "nodeGroups": [],
+  "id": "14RLXgxAZHMCbMgz",
+  "tags": []
+}

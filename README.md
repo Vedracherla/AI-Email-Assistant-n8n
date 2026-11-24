@@ -7,7 +7,6 @@ An automation built in **n8n Cloud** that reads incoming Gmail messages, classif
 
 - Screenshots are in the [`/screenshots`](./Ouput_Screenshots) folder.
 
-![Workflow](./AI Email Assistant.json)
 
 ## What it does
 

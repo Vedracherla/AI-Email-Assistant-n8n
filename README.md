@@ -4,12 +4,10 @@ An automation built in **n8n Cloud** that reads incoming Gmail messages, classif
 
 > Replies are saved as **drafts only**. Nothing is sent automatically.
 
-## Demo
 
-- Demo video: `ADD LINK HERE`
-- Screenshots are in the [`/screenshots`](./screenshots) folder.
+- Screenshots are in the [`/screenshots`](./Ouput_Screenshots) folder.
 
-![Workflow](./screenshots/workflow.png)
+![Workflow](./AI Email Assistant.json)
 
 ## What it does
 
@@ -106,4 +104,4 @@ Tested on **`NUMBER` sample emails** covering questions, complaints, spam-like m
 
 ## Author
 
-**YOUR NAME** | [LinkedIn](ADD_LINK) | [GitHub](ADD_LINK)
+**YOUR NAME** | [LinkedIn](https://linkedin.com/in/vedanth-racherla-a581b5286) | [GitHub](https://github.com/Vedracherla)
